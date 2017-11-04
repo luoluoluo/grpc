@@ -43,7 +43,8 @@ class BaseStub
     public function __construct($hostname, $opts, $channel = null)
     {
         $ssl_roots = file_get_contents(
-            dirname(__FILE__).'/../../../../etc/roots.pem');
+            dirname(__FILE__).'/../../../../etc/roots.pem'
+        );
         ChannelCredentials::setDefaultRootsPem($ssl_roots);
 
         $this->hostname = $hostname;
@@ -55,7 +56,9 @@ class BaseStub
             unset($opts['update_metadata']);
         }
         $package_config = json_decode(
-            file_get_contents(dirname(__FILE__).'/../../composer.json'), true);
+            file_get_contents(dirname(__FILE__).'/../../composer.json'),
+            true
+        );
         if (!empty($opts['grpc.primary_user_agent'])) {
             $opts['grpc.primary_user_agent'] .= ' ';
         } else {
@@ -79,14 +82,6 @@ class BaseStub
                     'Interceptor::intercept($channel, Interceptor|Interceptor[] $interceptors)');
             }
             $this->channel = $channel;
-            while(is_a($channel, 'Grpc\InterceptorChannel')) {
-                $channel = $channel->getNext();
-            }
-            if(!is_a($channel, 'Grpc\Channel')){
-                throw new \Exception(
-                    'Error: the deepest channel of InterceptorHelper::intercept ' .
-                'should be a Grpc\Channel object.');
-            }
         } else {
             $this->channel = new Channel($hostname, $opts);
         }
@@ -178,7 +173,8 @@ class BaseStub
         $last_slash_idx = strrpos($method, '/');
         if ($last_slash_idx === false) {
             throw new \InvalidArgumentException(
-                'service name must have a slash');
+                'service name must have a slash'
+            );
         }
         $service_name = substr($method, 0, $last_slash_idx);
 
@@ -206,7 +202,8 @@ class BaseStub
             if (!preg_match('/^[A-Za-z\d_-]+$/', $key)) {
                 throw new \InvalidArgumentException(
                     'Metadata keys must be nonempty strings containing only '.
-                    'alphanumeric characters, hyphens and underscores');
+                    'alphanumeric characters, hyphens and underscores'
+                );
             }
             $metadata_copy[strtolower($key)] = $value;
         }
@@ -214,124 +211,170 @@ class BaseStub
         return $metadata_copy;
     }
 
-    private function GrpcUnaryUnary($channel){
-        return function($method, $argument, $deserialize, array $metadata = [], array $options = []) use ($channel) {
-            $call = new UnaryCall($channel,
-                $method,
-                $deserialize,
-                $options);
-            $jwt_aud_uri = $this->_get_jwt_aud_uri($method);
-            if (is_callable($this->update_metadata)) {
-                $metadata = call_user_func($this->update_metadata,
-                $metadata,
-                $jwt_aud_uri);
-            }
-            $metadata = $this->_validate_and_normalize_metadata(
-                $metadata);
-            $call->start($argument, $metadata, $options);
-            return $call;
-        };
-    }
-
-    private function GrpcStreamUnary($channel) {
-        return function ($method, $deserialize, array $metadata = [], array $options = []) use ($channel) {
-            $call = new ClientStreamingCall($channel,
-                $method,
-                $deserialize,
-                $options);
-            $jwt_aud_uri = $this->_get_jwt_aud_uri($method);
-            if (is_callable($this->update_metadata)) {
-                $metadata = call_user_func($this->update_metadata,
-                $metadata,
-                $jwt_aud_uri);
-            }
-            $metadata = $this->_validate_and_normalize_metadata(
-                $metadata);
-            $call->start($metadata);
-            return $call;
-        };
-    }
-
-    private function GrpcUnaryStream($channel) {
+    private function GrpcUnaryUnary($channel)
+    {
         return function ($method, $argument, $deserialize, array $metadata = [], array $options = []) use ($channel) {
-            $call = new ServerStreamingCall($channel,
+            $call = new UnaryCall(
+                $channel,
                 $method,
                 $deserialize,
-                $options);
+                $options
+            );
             $jwt_aud_uri = $this->_get_jwt_aud_uri($method);
             if (is_callable($this->update_metadata)) {
-                $metadata = call_user_func($this->update_metadata,
+                $metadata = call_user_func(
+                    $this->update_metadata,
                 $metadata,
-                $jwt_aud_uri);
+                $jwt_aud_uri
+                );
             }
             $metadata = $this->_validate_and_normalize_metadata(
-                $metadata);
+                $metadata
+            );
             $call->start($argument, $metadata, $options);
             return $call;
         };
     }
 
-    private function GrpcStreamStream($channel) {
-        return function ($method, $deserialize, array $metadata = [], array $options = [])  use ($channel) {
-            $call = new BidiStreamingCall($channel,
+    private function GrpcStreamUnary($channel)
+    {
+        return function ($method, $deserialize, array $metadata = [], array $options = []) use ($channel) {
+            $call = new ClientStreamingCall(
+                $channel,
                 $method,
                 $deserialize,
-                $options);
+                $options
+            );
             $jwt_aud_uri = $this->_get_jwt_aud_uri($method);
             if (is_callable($this->update_metadata)) {
-                $metadata = call_user_func($this->update_metadata,
+                $metadata = call_user_func(
+                    $this->update_metadata,
                 $metadata,
-                $jwt_aud_uri);
+                $jwt_aud_uri
+                );
             }
             $metadata = $this->_validate_and_normalize_metadata(
-                $metadata);
+                $metadata
+            );
+            $call->start($metadata);
+            return $call;
+        };
+    }
+
+    private function GrpcUnaryStream($channel)
+    {
+        return function ($method, $argument, $deserialize, array $metadata = [], array $options = []) use ($channel) {
+            $call = new ServerStreamingCall(
+                $channel,
+                $method,
+                $deserialize,
+                $options
+            );
+            $jwt_aud_uri = $this->_get_jwt_aud_uri($method);
+            if (is_callable($this->update_metadata)) {
+                $metadata = call_user_func(
+                    $this->update_metadata,
+                $metadata,
+                $jwt_aud_uri
+                );
+            }
+            $metadata = $this->_validate_and_normalize_metadata(
+                $metadata
+            );
+            $call->start($argument, $metadata, $options);
+            return $call;
+        };
+    }
+
+    private function GrpcStreamStream($channel)
+    {
+        return function ($method, $deserialize, array $metadata = [], array $options = []) use ($channel) {
+            $call = new BidiStreamingCall(
+                $channel,
+                $method,
+                $deserialize,
+                $options
+            );
+            $jwt_aud_uri = $this->_get_jwt_aud_uri($method);
+            if (is_callable($this->update_metadata)) {
+                $metadata = call_user_func(
+                    $this->update_metadata,
+                $metadata,
+                $jwt_aud_uri
+                );
+            }
+            $metadata = $this->_validate_and_normalize_metadata(
+                $metadata
+            );
             $call->start($metadata);
 
             return $call;
         };
     }
 
-    private function UnaryUnaryCallFactory($channel){
-        $this->current_channel = $channel;
-        if(is_a($channel, 'Grpc\Channel')){
+    private function UnaryUnaryCallFactory($channel)
+    {
+        if (is_a($channel, 'Grpc\Channel')) {
             return $this->GrpcUnaryUnary($channel);
         }
-        return function($method, $argument, $deserialize, array $metadata = [], array $options = []) {
-            return $this->current_channel->getInterceptor()->interceptUnaryUnary($method, $argument, $deserialize,
-                $metadata, $options, $this->UnaryUnaryCallFactory($this->current_channel->getNext()));
+        return function ($method, $argument, $deserialize, array $metadata = [], array $options = []) use ($channel) {
+            return $channel->getInterceptor()->interceptUnaryUnary(
+                $method,
+                $argument,
+                $deserialize,
+                $metadata,
+                $options,
+                $this->UnaryUnaryCallFactory($channel->getNext())
+            );
         };
     }
 
-    private function UnaryStreamCallFactory($channel){
-        $this->current_channel = $channel;
-        if(is_a($channel, 'Grpc\Channel')){
-          return $this->GrpcUnaryStream($channel);
+    private function UnaryStreamCallFactory($channel)
+    {
+        if (is_a($channel, 'Grpc\Channel')) {
+            return $this->GrpcUnaryStream($channel);
         }
-        return function($method, $argument, $deserialize, array $metadata = [], array $options = []) {
-            return $this->current_channel->getInterceptor()->interceptUnaryStream($method, $argument, $deserialize,
-                $metadata, $options, $this->UnaryStreamCallFactory($this->current_channel->getNext()));
+        return function ($method, $argument, $deserialize, array $metadata = [], array $options = []) use ($channel) {
+            return $channel->getInterceptor()->interceptUnaryStream(
+                $method,
+                $argument,
+                $deserialize,
+                $metadata,
+                $options,
+                $this->UnaryStreamCallFactory($channel->getNext())
+            );
         };
     }
 
-    private function StreamUnaryCallFactory($channel){
-        $this->current_channel = $channel;
-        if(is_a($channel, 'Grpc\Channel')){
-          return $this->GrpcStreamUnary($channel);
+    private function StreamUnaryCallFactory($channel)
+    {
+        if (is_a($channel, 'Grpc\Channel')) {
+            return $this->GrpcStreamUnary($channel);
         }
-        return function($method, $deserialize, array $metadata = [], array $options = []) {
-            return $this->current_channel->getInterceptor()->interceptStreamUnary($method, $deserialize,
-                $metadata, $options, $this->StreamUnaryCallFactory($this->current_channel->getNext()));
+        return function ($method, $deserialize, array $metadata = [], array $options = []) use ($channel) {
+            return $channel->getInterceptor()->interceptStreamUnary(
+                $method,
+                $deserialize,
+                $metadata,
+                $options,
+                $this->StreamUnaryCallFactory($channel->getNext())
+            );
         };
     }
 
-    private function StreamStreamCallFactory($channel){
-        $this->current_channel = $channel;
-        if(is_a($channel, 'Grpc\Channel')){
-          return $this->GrpcStreamStream($channel);
+    private function StreamStreamCallFactory($channel)
+    {
+        if (is_a($channel, 'Grpc\Channel')) {
+            return $this->GrpcStreamStream($channel);
         }
-        return function($method, $deserialize, array $metadata = [], array $options = []) {
-            return $this->current_channel->getInterceptor()->interceptStreamStream($method, $deserialize,
-                $metadata, $options, $this->StreamStreamCallFactory($this->current_channel->getNext()));
+        return function ($method, $deserialize, array $metadata = [], array $options = []) use ($channel) {
+            return $channel->getInterceptor()->interceptStreamStream(
+                $method,
+                $deserialize,
+                $metadata,
+                $options,
+                $this->StreamStreamCallFactory($channel->getNext())
+            );
         };
     }
 
@@ -350,12 +393,13 @@ class BaseStub
      *
      * @return UnaryCall The active call object
      */
-    protected function _simpleRequest($method,
+    protected function _simpleRequest(
+        $method,
                                    $argument,
                                    $deserialize,
                                    array $metadata = [],
-                                   array $options = [])
-    {
+                                   array $options = []
+    ) {
         $call_factory = $this->UnaryUnaryCallFactory($this->channel);
         $call = $call_factory($method, $argument, $deserialize, $metadata, $options);
         return $call;
@@ -373,11 +417,12 @@ class BaseStub
      *
      * @return ClientStreamingCall The active call object
      */
-    protected function _clientStreamRequest($method,
+    protected function _clientStreamRequest(
+        $method,
                                          $deserialize,
                                          array $metadata = [],
-                                         array $options = [])
-    {
+                                         array $options = []
+    ) {
         $call_factory = $this->StreamUnaryCallFactory($this->channel);
         $call = $call_factory($method, $deserialize, $metadata, $options);
         return $call;
@@ -396,12 +441,13 @@ class BaseStub
      *
      * @return ServerStreamingCall The active call object
      */
-    protected function _serverStreamRequest($method,
+    protected function _serverStreamRequest(
+        $method,
                                          $argument,
                                          $deserialize,
                                          array $metadata = [],
-                                         array $options = [])
-    {
+                                         array $options = []
+    ) {
         $call_factory = $this->UnaryStreamCallFactory($this->channel);
         $call = $call_factory($method, $argument, $deserialize, $metadata, $options);
         return $call;
@@ -418,11 +464,12 @@ class BaseStub
      *
      * @return BidiStreamingCall The active call object
      */
-    protected function _bidiRequest($method,
+    protected function _bidiRequest(
+        $method,
                                  $deserialize,
                                  array $metadata = [],
-                                 array $options = [])
-    {
+                                 array $options = []
+    ) {
         $call_factory = $this->StreamStreamCallFactory($this->channel);
         $call = $call_factory($method, $deserialize, $metadata, $options);
         return $call;
