@@ -20,7 +20,8 @@
 namespace Grpc;
 
 /**
- * Represents an interceptor that intercept operations for 4 methods before call starts.
+ * Represents an interceptor that intercept RPC invocations before call starts.
+ * This is an EXPERIMENTAL API.
  */
 class Interceptor
 {
@@ -28,10 +29,9 @@ class Interceptor
       $method,
       $argument,
       $deserialize,
-                             array $metadata = [],
+      array $metadata = [],
       array $options = [],
-      $continuation
-  ) {
+      $continuation) {
         return $continuation($method, $argument, $deserialize, $metadata, $options);
     }
 
@@ -39,9 +39,8 @@ class Interceptor
       $method,
       $deserialize,
       array $metadata = [],
-                              array $options = [],
-      $continuation
-  ) {
+      array $options = [],
+      $continuation) {
         return $continuation($method, $deserialize, $metadata, $options);
     }
 
@@ -49,23 +48,29 @@ class Interceptor
       $method,
       $argument,
       $deserialize,
-                              array $metadata = [],
+      array $metadata = [],
       array $options = [],
-      $continuation
-  ) {
+      $continuation) {
         return $continuation($method, $argument, $deserialize, $metadata, $options);
     }
 
     public function interceptStreamStream(
       $method,
       $deserialize,
-                               array $metadata = [],
+      array $metadata = [],
       array $options = [],
-      $continuation
-  ) {
+      $continuation) {
         return $continuation($method, $deserialize, $metadata, $options);
     }
 
+  /**
+   * Intercept the methods with Channel
+   *
+   * @param Channel|InterceptorChannel $channel An already created Channel or InterceptorChannel object (optional)
+   * @param Interceptor|Interceptor[] $interceptors interceptors to be added
+   *
+   * @return InterceptorChannel
+   */
     public static function intercept($channel, $interceptors)
     {
         if (is_array($interceptors)) {

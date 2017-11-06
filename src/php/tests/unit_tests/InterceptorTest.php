@@ -111,7 +111,7 @@ class ChangeMetadataInterceptor2 extends Grpc\Interceptor
     public function interceptUnaryUnary($method, $argument, $deserialize, array $metadata = [], array $options = [], $continuation)
     {
         if (array_key_exists('foo', $metadata)) {
-            $metadata['bar'] = array('ChangeMetadataInterceptor should be execute first');
+            $metadata['bar'] = array('ChangeMetadataInterceptor should be executed first');
         } else {
             $metadata["bar"] = array('interceptor_from_unary_request');
         }
@@ -120,7 +120,7 @@ class ChangeMetadataInterceptor2 extends Grpc\Interceptor
     public function interceptStreamUnary($method, $deserialize, array $metadata = [], array $options = [], $continuation)
     {
         if (array_key_exists('foo', $metadata)) {
-            $metadata['bar'] = array('ChangeMetadataInterceptor should be execute first');
+            $metadata['bar'] = array('ChangeMetadataInterceptor should be executed first');
         } else {
             $metadata["bar"] = array('interceptor_from_stream_request');
         }
