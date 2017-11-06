@@ -315,8 +315,8 @@ class BaseStub
     private function _UnaryUnaryCallFactory($channel)
     {
         if (is_a($channel, 'Grpc\InterceptorChannel')) {
-          return function ($method, $argument, $deserialize, array $metadata = [], array $options = []) use ($channel) {
-            return $channel->getInterceptor()->interceptUnaryUnary(
+            return function ($method, $argument, $deserialize, array $metadata = [], array $options = []) use ($channel) {
+                return $channel->getInterceptor()->interceptUnaryUnary(
               $method,
               $argument,
               $deserialize,
@@ -324,16 +324,16 @@ class BaseStub
               $options,
               $this->_UnaryUnaryCallFactory($channel->getNext())
             );
-          };
+            };
         }
-      return $this->_GrpcUnaryUnary($channel);
+        return $this->_GrpcUnaryUnary($channel);
     }
 
     private function _UnaryStreamCallFactory($channel)
     {
         if (is_a($channel, 'Grpc\InterceptorChannel')) {
-          return function ($method, $argument, $deserialize, array $metadata = [], array $options = []) use ($channel) {
-            return $channel->getInterceptor()->interceptUnaryStream(
+            return function ($method, $argument, $deserialize, array $metadata = [], array $options = []) use ($channel) {
+                return $channel->getInterceptor()->interceptUnaryStream(
               $method,
               $argument,
               $deserialize,
@@ -341,23 +341,23 @@ class BaseStub
               $options,
               $this->_UnaryStreamCallFactory($channel->getNext())
             );
-          };
+            };
         }
-      return $this->_GrpcUnaryStream($channel);
+        return $this->_GrpcUnaryStream($channel);
     }
 
     private function _StreamUnaryCallFactory($channel)
     {
         if (is_a($channel, 'Grpc\InterceptorChannel')) {
-          return function ($method, $deserialize, array $metadata = [], array $options = []) use ($channel) {
-            return $channel->getInterceptor()->interceptStreamUnary(
+            return function ($method, $deserialize, array $metadata = [], array $options = []) use ($channel) {
+                return $channel->getInterceptor()->interceptStreamUnary(
               $method,
               $deserialize,
               $metadata,
               $options,
               $this->_StreamUnaryCallFactory($channel->getNext())
             );
-          };
+            };
         }
         return $this->_GrpcStreamUnary($channel);
     }
@@ -365,17 +365,17 @@ class BaseStub
     private function _StreamStreamCallFactory($channel)
     {
         if (is_a($channel, 'Grpc\InterceptorChannel')) {
-          return function ($method, $deserialize, array $metadata = [], array $options = []) use ($channel) {
-            return $channel->getInterceptor()->interceptStreamStream(
+            return function ($method, $deserialize, array $metadata = [], array $options = []) use ($channel) {
+                return $channel->getInterceptor()->interceptStreamStream(
               $method,
               $deserialize,
               $metadata,
               $options,
               $this->_StreamStreamCallFactory($channel->getNext())
             );
-          };
+            };
         }
-      return $this->_GrpcStreamStream($channel);
+        return $this->_GrpcStreamStream($channel);
     }
 
     /* This class is intended to be subclassed by generated code, so
@@ -398,7 +398,8 @@ class BaseStub
       $argument,
       $deserialize,
       array $metadata = [],
-      array $options = []) {
+      array $options = []
+    ) {
         $call_factory = $this->_UnaryUnaryCallFactory($this->channel);
         $call = $call_factory($method, $argument, $deserialize, $metadata, $options);
         return $call;
@@ -420,7 +421,8 @@ class BaseStub
       $method,
       $deserialize,
       array $metadata = [],
-      array $options = []) {
+      array $options = []
+    ) {
         $call_factory = $this->_StreamUnaryCallFactory($this->channel);
         $call = $call_factory($method, $deserialize, $metadata, $options);
         return $call;
@@ -444,7 +446,8 @@ class BaseStub
         $argument,
         $deserialize,
         array $metadata = [],
-        array $options = []) {
+        array $options = []
+    ) {
         $call_factory = $this->_UnaryStreamCallFactory($this->channel);
         $call = $call_factory($method, $argument, $deserialize, $metadata, $options);
         return $call;
@@ -465,7 +468,8 @@ class BaseStub
         $method,
         $deserialize,
         array $metadata = [],
-        array $options = []) {
+        array $options = []
+    ) {
         $call_factory = $this->_StreamStreamCallFactory($this->channel);
         $call = $call_factory($method, $deserialize, $metadata, $options);
         return $call;

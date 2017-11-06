@@ -31,7 +31,8 @@ class Interceptor
       $deserialize,
       array $metadata = [],
       array $options = [],
-      $continuation) {
+      $continuation
+    ) {
         return $continuation($method, $argument, $deserialize, $metadata, $options);
     }
 
@@ -40,7 +41,8 @@ class Interceptor
       $deserialize,
       array $metadata = [],
       array $options = [],
-      $continuation) {
+      $continuation
+    ) {
         return $continuation($method, $deserialize, $metadata, $options);
     }
 
@@ -50,7 +52,8 @@ class Interceptor
       $deserialize,
       array $metadata = [],
       array $options = [],
-      $continuation) {
+      $continuation
+    ) {
         return $continuation($method, $argument, $deserialize, $metadata, $options);
     }
 
@@ -59,18 +62,19 @@ class Interceptor
       $deserialize,
       array $metadata = [],
       array $options = [],
-      $continuation) {
+      $continuation
+    ) {
         return $continuation($method, $deserialize, $metadata, $options);
     }
 
-  /**
-   * Intercept the methods with Channel
-   *
-   * @param Channel|InterceptorChannel $channel An already created Channel or InterceptorChannel object (optional)
-   * @param Interceptor|Interceptor[] $interceptors interceptors to be added
-   *
-   * @return InterceptorChannel
-   */
+    /**
+     * Intercept the methods with Channel
+     *
+     * @param Channel|InterceptorChannel $channel An already created Channel or InterceptorChannel object (optional)
+     * @param Interceptor|Interceptor[] $interceptors interceptors to be added
+     *
+     * @return InterceptorChannel
+     */
     public static function intercept($channel, $interceptors)
     {
         if (is_array($interceptors)) {
